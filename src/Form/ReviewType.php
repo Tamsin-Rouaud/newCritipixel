@@ -24,13 +24,15 @@ final class ReviewType extends AbstractType
         $builder
             ->add('rating', ChoiceType::class, [
                 'label' => 'Note',
+                'required' => true,
                 'choices' => [
                     '1' => 1,
                     '2' => 2,
                     '3' => 3,
                     '4' => 4,
                     '5' => 5,
-                ]
+                ],
+                'placeholder' => 'Choisir une note',
             ])
             ->add('comment', TextareaType::class, [
                 'label' => 'Commentaire',

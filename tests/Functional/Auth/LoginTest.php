@@ -40,4 +40,14 @@ final class LoginTest extends FunctionalTestCase
 
         self::assertFalse($authorizationChecker->isGranted('IS_AUTHENTICATED'));
     }
+
+    public function testLoginUsingHelperMethod(): void
+{
+    $this->login('user+1@email.com');
+
+    $authChecker = $this->service(\Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface::class);
+
+    self::assertTrue($authChecker->isGranted('IS_AUTHENTICATED'));
+}
+
 }

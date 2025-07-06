@@ -11,22 +11,34 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class RegisterTest extends FunctionalTestCase
 {
     public function testThatRegistrationShouldSucceeded(): void
-    {
-        $this->get('/auth/register');
+{
+    $this->get('/auth/register');
 
-        $this->client->submitForm('S\'inscrire', self::getFormData());
+    // Générer un identifiant unique
+    $uniqueSuffix = uniqid();
+    $email = "user_$uniqueSuffix@email.com";
+    $username = "username_$uniqueSuffix";
+    $plainPassword = 'SuperPassword123!';
 
-        self::assertResponseRedirects('/auth/login');
+    $formData = [
+        'register[username]' => $username,
+        'register[email]' => $email,
+        'register[plainPassword]' => $plainPassword,
+    ];
 
-        $user = $this->getEntityManager()->getRepository(User::class)->findOneByEmail('user@email.com');
+    $this->client->submitForm("S'inscrire", $formData);
 
-        $userPasswordHasher = $this->service(UserPasswordHasherInterface::class);
+    self::assertResponseRedirects('/auth/login');
 
-        self::assertNotNull($user);
-        self::assertSame('username', $user->getUsername());
-        self::assertSame('user@email.com', $user->getEmail());
-        self::assertTrue($userPasswordHasher->isPasswordValid($user, 'SuperPassword123!'));
-    }
+    $user = $this->getEntityManager()->getRepository(User::class)->findOneByEmail($email);
+    $userPasswordHasher = $this->service(UserPasswordHasherInterface::class);
+
+    self::assertNotNull($user);
+    self::assertSame($username, $user->getUsername());
+    self::assertSame($email, $user->getEmail());
+    self::assertTrue($userPasswordHasher->isPasswordValid($user, $plainPassword));
+}
+
 
     /**
      * @dataProvider provideInvalidFormData

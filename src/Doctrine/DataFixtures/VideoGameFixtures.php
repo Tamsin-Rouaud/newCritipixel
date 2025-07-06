@@ -39,14 +39,51 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
                 ->setImageSize(2_098_872);
         }, range(0, 49));
 
-        foreach ($videoGames as $videoGame) {
-            // Ajouter entre 1 et 3 tags aléatoires
-            $tags = $this->faker->randomElements($allTags, rand(1, 3));
-            foreach ($tags as $tag) {
-                $videoGame->getTags()->add($tag);
+        foreach ($videoGames as $index => $videoGame) {
+            switch ($index) {
+                case 0:
+                    $tagIds = [1, 2, 3, 4, 5];
+                    break;
+                case 21:
+                    $tagIds = [1];
+                    break;
+                case 22:
+                    $tagIds = [1, 2];
+                    break;
+                case 23:
+                    $tagIds = [1, 2, 3];
+                    break;
+                case 24:
+                    $tagIds = [1, 2, 3, 4];
+                    break;
+                case 25:
+                    $tagIds = [1, 2, 3, 4, 5];
+                    break;
+                case 46:
+                    $tagIds = [1];
+                    break;
+                case 47:
+                    $tagIds = [1, 2];
+                    break;
+                case 48:
+                    $tagIds = [1, 2, 3];
+                    break;
+                case 49:
+                    $tagIds = [1, 2, 3, 4];
+                    break;
+                default:
+                    $tagIds = array_map(
+                        fn(Tag $tag) => $tag->getId(),
+                        $this->faker->randomElements($allTags, rand(1, 3))
+                    );
             }
 
-            // Ajouter entre 2 et 5 reviews
+            foreach ($allTags as $tag) {
+                if (in_array($tag->getId(), $tagIds, true)) {
+                    $videoGame->getTags()->add($tag);
+                }
+            }
+
             $reviewers = $this->faker->randomElements($users, rand(2, 5));
             foreach ($reviewers as $user) {
                 $review = (new Review())
@@ -59,8 +96,7 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
                 $manager->persist($review);
             }
 
-            // Calculs statistiques
-           $this->calculateAverageRating->calculateAverage($videoGame);
+            $this->calculateAverageRating->calculateAverage($videoGame);
             $this->countRatingsPerValue->countRatingsPerValue($videoGame);
 
             $manager->persist($videoGame);
@@ -73,7 +109,7 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
     {
         return [
             UserFixtures::class,
-            TagFixtures::class
+            TagFixtures::class,
         ];
     }
 }

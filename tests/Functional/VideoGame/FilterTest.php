@@ -26,4 +26,53 @@ final class FilterTest extends FunctionalTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorCount(1, 'article.game-card');
     }
+
+    /**
+     * @dataProvider provideTagFilters
+     */
+    public function testShouldFilterVideoGamesByTags(array $tagIds, int $expectedMinCount): void
+    {
+        $crawler = $this->get('/', ['filter' => ['tags' => $tagIds]]);
+        self::assertResponseIsSuccessful();
+
+        $count = $crawler->filter('article.game-card')->count();
+
+        if ($expectedMinCount === 0) {
+            self::assertSame(0, $count);
+        } else {
+            self::assertGreaterThanOrEqual(
+                $expectedMinCount,
+                $count,
+                sprintf('On attend au moins %d jeux pour les tags %s, mais %d trouvés.', $expectedMinCount, implode(',', $tagIds), $count)
+            );
+        }
+    }
+
+    public static function provideTagFilters(): iterable
+    {
+        yield 'aucun tag' => [
+            [],
+            10, // pagination standard
+        ];
+
+        yield 'tag RPG (id 1)' => [
+            ['1'],
+            1,
+        ];
+
+        yield 'tags RPG + Action (1,2)' => [
+            ['1', '2'],
+            1,
+        ];
+
+        yield 'tags Stratégie + Indépendant (7,5)' => [
+            ['7', '5'],
+            1,
+        ];
+
+        yield 'tag inexistant (id 999)' => [
+            ['999'],
+            10,
+        ];
+    }
 }
